@@ -19,11 +19,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 
-Route::post('/driverLogin','driverController@login');
+Route::post('/driver/login','driverController@login');
 
 Route::post('/driver','driverController@create');
 Route::get('/driver','driverController@getAll');
 Route::get('/driver/{id}','driverController@getById');
-Route::post('/driver/{id}','driverController@updateById');
+Route::put('/driver/{id}','driverController@updateById');
 Route::delete('/driver/{id}','driverController@deleteById');
 

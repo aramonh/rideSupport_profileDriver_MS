@@ -18,7 +18,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
+//CUSTOM ROUTES
 Route::post('/driver/login','driverController@login');
 
 Route::post('/driver','driverController@create');

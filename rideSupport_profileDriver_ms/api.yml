@@ -1,0 +1,227 @@
+#Test with: http://editor.swagger.io/
+
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Microservice for Authentication of Drivers
+  description: PHP(Laravel) + MySQL
+  license:
+    name: Software Architecture, 2020-I
+host: host:8000
+basePath: /rideSupport-profileDriver-ms/routes
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+ 
+
+  /api/driver:
+    post:
+      summary: Creates a new driver
+      operationId: createDriver
+      parameters:
+        - name: driver
+          in: body
+          required: true
+          description: Driver Object
+          schema:
+            $ref: '#/definitions/Driver'
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    get:
+      summary: Returns all drivers
+      operationId: getAllDrivers
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/DriverList'
+        '406':
+          description: Not Acceptable (Invalid Params)
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+  /api/driver/{id}:
+    get:
+      summary: Returns an driver with the given id
+      operationId: getDriverById
+      parameters:
+        - name: id
+          in: path
+          description: The id of the driver to be returned
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/Driver'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '406':
+            description: Not Acceptable (Invalid Params)
+            schema:
+              $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+    put:
+      summary: Updates an driver with the given id
+      operationId: updateDriver
+      parameters:
+        - name: id
+          in: path
+          description: The id of the driver to be updated
+          required: true
+          type: integer
+        - name: driver
+          in: body
+          required: true
+          description: Driver Object
+          schema:
+            $ref: '#/definitions/Driver'
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '406':
+            description: Not Acceptable (Invalid Params)
+            schema:
+              $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+    delete:
+      summary: Deletes an driver with the given id
+      operationId: deleteDriver
+      parameters:
+        - name: id
+          in: path
+          description: The id of the driver to be deleted
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Ok
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '406':
+            description: Not Acceptable (Invalid Params)
+            schema:
+              $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+            
+            
+            
+  /api/driver/login:
+    post:
+      summary: Login driver existing
+      operationId: loginDriver
+      parameters:
+        - name: login
+          in: body
+          required: true
+          description: Login Object
+          schema:
+            $ref: '#/definitions/Login'
+      responses:
+        '201':
+          description: Authorizated
+        '400':
+          description: Username/Email does not exist, please register
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+definitions:
+
+  # Drivers
+  Driver:
+    type: object
+    properties:
+      id:
+        type: integer
+      email:
+        type: string
+      password:
+        type: string
+      name:
+        type: string
+      lastName:
+        type: string
+      age:
+        type: number
+      address:
+        type: string
+      phone:
+        type: number
+      vehicle:
+        type: string
+
+  Login:
+    type: object
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+
+  DriverList:
+    type: object
+    required:
+      - total
+      - list
+    properties:
+      total:
+        type: number
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Driver'
+
+# Errors
+  ErrorModel:
+    type: object
+    required:
+      - message
+      - code
+    properties:
+      message:
+        type: string
+      code:
+        type: number
+      description:
+        type: object

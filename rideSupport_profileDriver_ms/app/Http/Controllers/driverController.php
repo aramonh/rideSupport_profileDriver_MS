@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Driver;
+use App\Login;
 class driverController extends Controller
 {
 
@@ -11,7 +12,7 @@ class driverController extends Controller
         $email = $request->input('email');
         $password = $request->input('password');
 
-        $drivers= Driver::where('email',$email)->first();
+        $drivers= Login::where('email',$email)->first();
 
             if($drivers==""){
                 return response("Username/Email does not exist, please register.");
@@ -29,11 +30,16 @@ class driverController extends Controller
 
     public function create(Request $request){
         $drivers = new Driver();
-
-        $drivers["name"] = $request->input('name');
+             
         $drivers["email"] = $request->input('email');
         $drivers["password"] = $request->input('password');
-    
+        $drivers["name"] = $request->input('name');
+        $drivers["lastname"] = $request->input('lastname');
+        $drivers["age"] = $request->input('age');
+        $drivers["address"] = $request->input('address');
+        $drivers["phone"] = $request->input('phone');
+        $drivers["vehicle"] = $request->input('vehicle');
+
         $drivers->save();
         return response()->json($drivers);
     }
@@ -51,10 +57,36 @@ class driverController extends Controller
 
     public function updateById($id, Request $request){
         $drivers= Driver::find($id);
-
-        $drivers["name"] = $request->input('name');
-        $drivers["email"] = $request->input('email');
-        $drivers["password"] = $request->input('password');
+       
+        
+        if($request->input('email')){
+            $drivers["email"] = $request->input('email');
+        }
+        if($request->input('password')){
+            $drivers["password"] = $request->input('password');
+        }
+        if($request->input('name')){
+            $drivers["name"] = $request->input('name');
+        }
+        if($request->input('lastname')){
+            $drivers["lastname"] = $request->input('lastname');
+        }
+        if($request->input('age')){
+            $drivers["age"] = $request->input('age');
+        }
+        if($request->input('address')){
+            $drivers["address"] = $request->input('address');
+        }
+        if($request->input('phone')){
+            $drivers["phone"] = $request->input('phone');
+        }
+        if($request->input('vehicle')){
+            $drivers["vehicle"] = $request->input('vehicle');
+        }
+        
+       
+        
+        
     
         $drivers->save();
         return response()->json($drivers);

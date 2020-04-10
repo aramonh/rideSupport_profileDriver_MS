@@ -8,7 +8,16 @@ class Driver extends Model
 {
     protected $table ='drivers';
     
-    protected $fillable = ['name','email','password'];
-
+    protected $fillable = [
+        'email',
+        'password',
+        'name',
+        'lastname',
+        'age',
+        'address',
+        'phone',
+        'vehicle',
+];
+   
     //
 }

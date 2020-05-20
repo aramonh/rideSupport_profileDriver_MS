@@ -2,9 +2,14 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
 
-class Driver extends Model
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+//Añadimos la clase JWTSubject 
+use Tymon\JWTAuth\Contracts\JWTSubject;
+
+class Driver extends Authenticatable implements JWTSubject
 {
     protected $table ='drivers';
     
@@ -17,7 +22,23 @@ class Driver extends Model
         'address',
         'phone',
         'vehicle',
+        'remember_token',
 ];
+protected $hidden = [
+    
+];
+
+/*
+    Añadiremos estos dos métodos
+*/
+public function getJWTIdentifier()
+{
+    return $this->getKey();
+}
+public function getJWTCustomClaims()
+{
+    return [];
+}
    
     //
 }

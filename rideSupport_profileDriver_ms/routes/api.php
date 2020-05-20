@@ -14,16 +14,26 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
+/*Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
+});
+*/
+
+Route::group(['middleware' => ['jwt.verify']], function() {
+    /*AÑADE AQUI LAS RUTAS QUE QUIERAS PROTEGER CON JWT*/
+    Route::get('/driver','driverController@getAll');
+    Route::get('/driver/{id}','driverController@getById');
+    Route::delete('/driver/{id}','driverController@deleteById');
+
+    Route::post('/driver/logout','driverController@logout');
 });
 
 //CUSTOM ROUTES
-Route::post('/driver/login','driverController@login');
+Route::post('/driver/login','driverController@authenticate');
 
-Route::post('/driver','driverController@create');
-Route::get('/driver','driverController@getAll');
-Route::get('/driver/{id}','driverController@getById');
+Route::post('/driver','driverController@register');
+
+
 Route::put('/driver/{id}','driverController@updateById');
-Route::delete('/driver/{id}','driverController@deleteById');
+
 

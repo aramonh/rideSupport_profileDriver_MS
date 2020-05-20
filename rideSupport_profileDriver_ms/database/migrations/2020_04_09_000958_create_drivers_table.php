@@ -25,7 +25,7 @@ class CreateDriversTable extends Migration
             $table->string('address');
             $table->integer('phone');
             $table->string('vehicle');
-            //$table->rememberToken();
+            $table->rememberToken();
             $table->timestamps();
         });
     }

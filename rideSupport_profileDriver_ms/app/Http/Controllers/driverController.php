@@ -1,49 +1,89 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
+    use Illuminate\Support\Facades\Hash;
+    use Illuminate\Support\Facades\Validator;
+    use JWTAuth;
+    use Tymon\JWTAuth\Exceptions\JWTException;
+
 use App\Driver;
 use App\Login;
 class driverController extends Controller
 {
 
-    public function login(Request $request){
-        $email = $request->input('email');
-        $password = $request->input('password');
-
-        $drivers= Login::where('email',$email)->first();
-
-            if($drivers==""){
-                return response("Username/Email does not exist, please register.");
-            }else{
-                if($drivers["password"]!=$password) {
-                    return response("The password is wrong, try again with another one.");
-                }else{
-                    //TODO Devolver TOKENs
-                    return response("Authorizated");
-                    //return response()->json($drivers);
-                }
+    public function authenticate(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+        try {
+            if (! $token = JWTAuth::attempt($credentials)) {
+                return response()->json(['error' => 'invalid_credentials'], 400);
             }
-            return 0;
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'could_not_create_token'], 500);
+        }
+        return response()->json(compact('token'));
     }
+    public function getAuthenticatedUser()
+    {
+        try {
+            if (!$drivers= JWTAuth::parseToken()->authenticate()) {
+                    return response()->json(['user_not_found'], 404);
+            }
+            } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+                    return response()->json(['token_expired'], $e->getStatusCode());
+            } catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+                    return response()->json(['token_invalid'], $e->getStatusCode());
+            } catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
+                    return response()->json(['token_absent'], $e->getStatusCode());
+            }
+            return response()->json(compact('drivers'));
+    }
+    
+    public function register(Request $request)
+        {
+                $validator = Validator::make($request->all(), [
+                
+                'email' => 'required|string|email|max:255|unique:drivers',
+                'password' => 'required|string',
+                'name' => 'required|string|max:255',
+                'lastname' => 'required|string|max:255',
+                'age' => 'required|integer',
+                'address' => 'required|string|max:255',
+                'phone' => 'required|integer',
+                'vehicle' => 'required|string|max:255',
+            ]);
 
-    public function create(Request $request){
-        $drivers = new Driver();
+            if($validator->fails()){
+                    return response()->json($validator->errors()->toJson(), 400);
+            }
+            $drivers = new Driver();
              
-        $drivers["email"] = $request->input('email');
-        $drivers["password"] = $request->input('password');
-        $drivers["name"] = $request->input('name');
-        $drivers["lastname"] = $request->input('lastname');
-        $drivers["age"] = $request->input('age');
-        $drivers["address"] = $request->input('address');
-        $drivers["phone"] = $request->input('phone');
-        $drivers["vehicle"] = $request->input('vehicle');
+            $drivers["email"] = $request->input('email');
+            $drivers["password"]=Hash::make($request->get('password'));
+            $drivers["name"] = $request->input('name');
+            $drivers["lastname"] = $request->input('lastname');
+            $drivers["age"] = $request->input('age');
+            $drivers["address"] = $request->input('address');
+            $drivers["phone"] = $request->input('phone');
+            $drivers["vehicle"] = $request->input('vehicle');
+    
+            $drivers->save();
+           
 
-        $drivers->save();
-        return response()->json($drivers);
-    }
+            $token = JWTAuth::fromUser($drivers);
 
+            return response()->json(compact('drivers','token'),201);
+        }
+
+        public function logout()
+        {
+            JWTAuth::invalidate(JWTAuth::getToken());
+            return response()->json(['message' => 'Successfully logged out']);
+        }
+   
+
+ 
     public function getAll(){
         $drivers= Driver::all();
         return response()->json($drivers);

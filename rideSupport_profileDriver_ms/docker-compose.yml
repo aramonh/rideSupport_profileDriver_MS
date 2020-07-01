@@ -1,49 +1,66 @@
-version: "3.7"
+version: '3'
 services:
+
+  #PHP Service
   app:
     build:
-      args:
-        user: sammy
-        uid: 1000
-      context: ./
+      context: .
       dockerfile: Dockerfile
-    image: authDriver
-    container_name: authDriver-app
+    image: digitalocean.com/php
+    container_name: app
     restart: unless-stopped
-    working_dir: /var/www/
-    volumes:
-      - ./:/var/www
-    networks:
-      - authDriver
-
-  db:
-    image: mysql:5.7
-    container_name: authDriver-db
-    restart: unless-stopped
+    tty: true
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_USER: ${DB_USERNAME}
+      SERVICE_NAME: app
       SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
-    volumes:
-      - ./docker-compose/mysql:/docker-entrypoint-initdb.d
-    networks:
-      - authDriver
-
-  nginx:
-    image: nginx:alpine
-    container_name: authDriver-nginx
-    restart: unless-stopped
-    ports:
-      - 8000:80
+    working_dir: /var/www
     volumes:
       - ./:/var/www
-      - ./docker-compose/nginx:/etc/nginx/conf.d/
+      - ./docker-compose/php/local.ini:/usr/local/etc/php/conf.d/local.ini
     networks:
-      - authDriver
+      - app-network
 
+  #Nginx Service
+  webserver:
+    image: nginx:alpine
+    container_name: webserver
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8000:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www
+      - ./docker-compose/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - app-network
+
+  #MySQL Service
+  db:
+    image: mysql:5.7.22
+    container_name: db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+        MYSQL_DATABASE: ${DB_DATABASE}
+        MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+        MYSQL_PASSWORD: ${DB_PASSWORD}
+        MYSQL_USER: ${DB_USERNAME}
+        SERVICE_TAGS: dev
+        SERVICE_NAME: mysql
+    volumes:
+      - dbdata:/var/lib/mysql/
+      - ./docker-compose/mysql/:/etc/mysql/
+    networks:
+      - app-network
+
+#Docker Networks
 networks:
-  authDriver:
+  app-network:
     driver: bridge
+#Volumes
+volumes:
+  dbdata:
+    driver: local
